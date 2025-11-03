@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container" style="padding:40px;">
+    <h2>Payment Failed / Canceled</h2>
+    <p>{{ message|default:'Payment could not be completed.' }}</p>
+    <pre>{{ data }}</pre>
+    {% if course %}
+    <a href="{% url 'course_detail' course.id %}">Back to course</a>
+    {% else %}
+    <a href="{% url 'courses' %}">Back to courses</a>
+    {% endif %}
+</div>
+{% endblock %}

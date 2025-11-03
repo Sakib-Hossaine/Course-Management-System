@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="marks-container">
+    <div class="profile-header">
+        <h1>Student Marks - {{ user.username }}</h1>
+    </div>
+    
+    <div class="marks-table-container">
+        <table class="marks-table">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Grade</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if marks %}
+                    {% for mark in marks %}
+                    <tr>
+                        <td>{{ mark.subject }}</td>
+                        <td>{{ mark.marks }}</td>
+                        <td>{{ mark.grade }}</td>
+                        <td>{{ mark.date }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="no-results">No marks available yet.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+    {# If there are no real marks, show a static sample/demo table to illustrate the layout #}
+    {% if not marks %}
+    <div class="sample-marks">
+        <h2>Sample Marks </h2>
+        <table class="marks-table">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Grade</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Mathematics</td>
+                    <td>92</td>
+                    <td>A</td>
+                    <td>2025-05-20</td>
+                </tr>
+                <tr>
+                    <td>English</td>
+                    <td>88</td>
+                    <td>A-</td>
+                    <td>2025-05-18</td>
+                </tr>
+                <tr>
+                    <td>Science</td>
+                    <td>85</td>
+                    <td>B+</td>
+                    <td>2025-05-19</td>
+                </tr>
+                <tr>
+                    <td>History</td>
+                    <td>79</td>
+                    <td>B</td>
+                    <td>2025-05-17</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+    <div class="action-buttons">
+        <a href="{% url 'users:student_profile' %}" class="btn">Back to Profile</a>
+    </div>
+</div>
+{% endblock %}

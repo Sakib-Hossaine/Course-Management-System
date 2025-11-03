@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add course</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background: #f8faff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .add-course-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(78,84,200,0.18);
+            padding: 32px 32px 24px 32px;
+        }
+        .add-course-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 24px;
+        }
+        .add-course-form label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+        }
+        .add-course-form input[type="text"],
+        .add-course-form input[type="number"],
+        .add-course-form input[type="file"],
+        .add-course-form input[type="url"],
+        .add-course-form select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 6px;
+            background: #f7f8fa;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .add-course-form input[type="text"]:focus,
+        .add-course-form input[type="number"]:focus,
+        .add-course-form input[type="url"]:focus,
+        .add-course-form select:focus {
+            border-color: #4e54c8;
+        }
+        .add-course-form input[type="file"] {
+            padding: 4px 0;
+        }
+        .form-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-row .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin-left: 2px;
+            color: #4e54c8;
+            transition: color 0.2s;
+        }
+        .form-row .icon-btn:hover {
+            color: #222;
+        }
+        .add-course-form .image-preview {
+            margin-top: 8px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .add-course-form .image-preview img {
+            width: 48px;
+            height: 48px;
+            object-fit: cover;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            background: #fafafa;
+        }
+        .add-course-form .image-preview .no-image {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            background: #fafafa;
+            color: #bbb;
+            font-size: 1.5rem;
+        }
+        .add-course-form .form-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 18px;
+        }
+        .add-course-form button[type="submit"] {
+            flex: 1;
+            background: #2ecc40;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .add-course-form button[type="submit"]:hover {
+            background: #27ae38;
+        }
+        .add-course-form button[type="reset"] {
+            flex: 1;
+            background: #e74c3c;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .add-course-form button[type="reset"]:hover {
+            background: #c0392b;
+        }
+        .add-course-form .field-label {
+            margin-bottom: 2px;
+        }
+        .add-course-form .category-select {
+            width: 100%;
+        }
+        .add-course-form .image-preview-label {
+            font-size: 0.95rem;
+            color: #888;
+            margin-bottom: 2px;
+        }
+    </style>
+    <!-- For icons, using Unicode. You can replace with SVG or icon fonts if desired -->
+</head>
+<body>
+<div class="add-course-container">
+    <div class="add-course-title">Add course</div>
+    <form class="add-course-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="form-actions">
+            <button type="submit">Add Course</button>
+            <button type="reset">Reset</button>
+        </div>
+    </form>
+</div>
+<script>
+    // Image preview functionality
+    document.getElementById('image').addEventListener('change', function(event) {
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = '';
+        const file = event.target.files[0];
+        if (file) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.onload = function() {
+                URL.revokeObjectURL(img.src);
+            }
+            preview.appendChild(img);
+        } else {
+            const span = document.createElement('span');
+            span.className = 'no-image';
+            span.innerHTML = '&#128247;';
+            preview.appendChild(span);
+        }
+    });
+    // Optional: Add functionality for instructor buttons as needed
+</script>
+</body>
+</html>

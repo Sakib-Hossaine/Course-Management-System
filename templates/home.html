@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <style>
+        /* Base Styles */
+        :root {
+            --primary: #4a6bff;
+            --secondary: #00c8ff;
+            --dark: #121212;
+            --darker: #0a0a0a;
+            --light: #f8f9fa;
+            --gray: #2d2d2d;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* Background Animation */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(-45deg, var(--darker), #1a1a2e, #16213e, #0f3460);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 8rem 2rem;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #3a1c71);
+            background-size: 400% 400%;
+            animation: gradientBG 12s ease infinite;
+            z-index: -2;
+        }
+        
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(74,107,255,0.1) 0%, rgba(0,0,0,0.8) 100%);
+            z-index: -1;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #ffffff, #e0e0e0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: fadeInUp 1s ease;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            letter-spacing: 1px;
+        }
+        
+        .hero p {
+            font-size: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            color: rgba(255,255,255,0.8);
+            animation: fadeInUp 1s ease 0.3s both;
+            line-height: 1.6;
+        }
+        
+        /* Floating Particles Animation */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            animation: float 15s infinite linear;
+            z-index: -1;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-1000px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 5rem 1.5rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.2rem;
+            }
+        }
+        
+       
+        
+        /* Who We Serve Section */
+        .who-we-serve {
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+        
+        .who-we-serve h2 {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--secondary);
+            animation: fadeIn 1s ease;
+        }
+        
+        .serve-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .serve-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            width: 300px;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeInUp 1s ease;
+        }
+        
+        .serve-card:nth-child(2) {
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+        
+        .serve-card:nth-child(3) {
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+        
+        .serve-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 200, 255, 0.2);
+            background-color: rgba(0, 200, 255, 0.1);
+        }
+        
+        .serve-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+        
+       
+        /* Math and Test Prep Section */
+.math-test-prep {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 4rem 2rem;
+    flex-wrap: wrap;
+}
+
+.light-blue-box {
+    background-color: rgba(0, 200, 255, 0.1);
+    border-radius: 15px;
+    padding: 2rem;
+    width: 45%;
+    min-width: 300px;
+    transition: all 0.4s ease;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(0, 200, 255, 0.2);
+    animation: fadeIn 1s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.light-blue-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.8));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 0;
+}
+
+.light-blue-box:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 25px rgba(0, 200, 255, 0.3);
+}
+
+.light-blue-box:hover::before {
+    opacity: 1;
+}
+
+.light-blue-box h2 {
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    position: relative;
+    z-index: 1;
+}
+
+.light-blue-box ul {
+    list-style-type: none;
+    padding-left: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.light-blue-box li {
+    padding: 0.5rem 0;
+    position: relative;
+    padding-left: 1.5rem;
+    color: #ddd;
+    transition: color 0.3s ease;
+}
+
+.light-blue-box:hover li {
+    color: #333; /* Dark color for better visibility on hover */
+}
+
+.light-blue-box li::before {
+    content: '▹';
+    position: absolute;
+    left: 0;
+    color: var(--secondary);
+    transition: color 0.3s ease;
+}
+
+.light-blue-box:hover li::before {
+    color: var(--primary); /* Darker color on hover */
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero p {
+                font-size: 1.2rem;
+            }
+            
+            .blue-button {
+                padding: 0.8rem 1.8rem;
+                font-size: 1rem;
+            }
+            
+            .serve-card {
+                width: 100%;
+                max-width: 350px;
+            }
+            
+            .light-blue-box {
+                width: 100%;
+            }
+        }
+    </style>
+    <script>
+        // Create floating particles
+        document.addEventListener('DOMContentLoaded', function() {
+            const hero = document.querySelector('.hero');
+            const particleCount = 15;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random properties
+                const size = Math.random() * 20 + 5;
+                const posX = Math.random() * 100;
+                const delay = Math.random() * 15;
+                const duration = Math.random() * 10 + 10;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}%`;
+                particle.style.animationDelay = `${delay}s`;
+                particle.style.animationDuration = `${duration}s`;
+                
+                hero.appendChild(particle);
+            }
+        });
+    </script>
+
+    <div class="bg-animation"></div>
+    
+    <main>
+        <section class="hero">
+            <div class="hero">
+                <h1>For every student, every classroom. Real results.</h1>
+                <p>We're a nonprofit with the mission to provide a free, world-class education for anyone, anywhere.</p>
+                <h1>Let's Get Started As</h1>
+                <div class="button-container">
+                    <!-- Links temporarily disabled: remove href to prevent navigation and add .disabled for styling -->
+                    <a class="blue-button disabled" aria-disabled="true">Learners</a>
+                    <a class="blue-button disabled" aria-disabled="true">Teachers</a>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Who We Serve Section -->
+        <section class="who-we-serve">
+            <h2>Who We Serve</h2>
+            <div class="serve-container">
+                <div class="serve-card dark-bg">
+                    <h3>Learners</h3>
+                    <p>Personalized learning for students of all ages</p>
+                </div>
+                <div class="serve-card dark-bg">
+                    <h3>Teachers</h3>
+                    <p>Tools to empower educators and inspire students</p>
+                </div>
+                <div class="serve-card dark-bg">
+                    <h3>Parents</h3>
+                    <p>Resources to support your child's education</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Math and Test Prep Section -->
+        <section class="math-test-prep">
+            <div class="light-blue-box">
+                <h2>Math: Pre-K - 8th grade</h2>
+                <ul>
+                    <li>Programming grade 2 (Programmer Kids)</li>
+                    <li>Early math review</li>
+                    <li>Grades 6 - 8 (6th grade, 7th grade, 8th grade)</li>
+                </ul>
+            </div>
+            <div class="light-blue-box">
+                <h2>Test Prep</h2>
+                <ul>
+                    <li>Competitive</li>
+                    <li>IUPC</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+{% endblock content %}

@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="signup-wrapper">
+    <div class="signup-hero">
+        <img src="{% static 'images/n_s.jpg' %}" alt="Let's Learn Image" class="hero-image">
+    </div>
+    <div class="signup-content">
+        <h1 class="site-name animate-pop">Join Let's Learn <br>to activate your Learning</h1>
+        <p class="animate-fade-in">sign in to Let's Learn to get started!</p>
+
+        <div class="button-group">
+            <button class="role-button active" id="learner-btn">Learner</button>
+            <button class="role-button" id="teacher-btn">Teacher</button>
+            
+        </div>
+
+        <div class="signup-options">
+            <form method="post" class="signup-form animate-fade-in">
+                {% csrf_token %}
+                <input type="hidden" name="role" id="selected-role" value="learner">
+                
+                <div class="form-group">
+                    <label for="full-name">Full Name</label>
+                    <input type="text" id="full-name" name="full_name" required placeholder="">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Create Password</label>
+                    <input type="password" id="password" name="password" required placeholder="">
+                    <div class=""></div>
+                </div>
+                
+              
+                
+                <button type="submit" class="signup-button">Create Account</button>
+            </form>
+        </div>
+
+        <p class="login-prompt animate-fade-in">Already have an account? <a href="{% url 'users:login' %}">Log in</a></p>
+    </div>
+</div>
+
+<style>
+    /* Button Group Styles */
+    .button-group {
+        display: flex;
+        gap: 10px;
+        margin: 20px 0;
+        justify-content: center;
+    }
+    
+    .role-button {
+        padding: 10px 20px;
+        background-color: #f0f0f0;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    
+    .role-button.active {
+        background-color: blue;
+        color: white;
+    }
+    
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="password"] {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 16px;
+    }
+    
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+    }
+    
+    .checkbox-group input {
+        margin-right: 10px;
+    }
+    
+    .password-strength {
+        height: 4px;
+        background: #eee;
+        margin-top: 5px;
+        border-radius: 2px;
+    }
+    
+    .signup-button {
+        width: 100%;
+        padding: 14px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    // JavaScript to handle role selection
+    document.addEventListener('DOMContentLoaded', function() {
+        const roleButtons = document.querySelectorAll('.role-button');
+        const roleInput = document.getElementById('selected-role');
+        
+        roleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                roleButtons.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                // Update hidden input value
+                roleInput.value = this.id.replace('-btn', '');
+            });
+        });
+    });
+</script>
+{% endblock content %}

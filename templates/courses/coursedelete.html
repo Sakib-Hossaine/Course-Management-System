@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Course</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #e74c3c 0%, #f9d423 100%);
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .delete-container {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(231,76,60,0.18);
+            max-width: 400px;
+            width: 100%;
+            padding: 36px 28px 28px 28px;
+            margin: 40px 0;
+            text-align: center;
+            animation: fadeInDown 0.7s cubic-bezier(.39,.575,.565,1) both;
+        }
+        @keyframes fadeInDown {
+            0% { opacity: 0; transform: translateY(-40px);}
+            100% { opacity: 1; transform: translateY(0);}
+        }
+        .delete-title {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 18px;
+        }
+        .delete-message {
+            color: #333;
+            font-size: 1.1rem;
+            margin-bottom: 28px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        button[type="submit"] {
+            background: linear-gradient(135deg, #e74c3c, #f9d423);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button[type="submit"]:hover {
+            background: linear-gradient(135deg, #f9d423, #e74c3c);
+        }
+        a.cancel-link {
+            display: inline-block;
+            margin-top: 6px;
+            color: #e74c3c;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        a.cancel-link:hover {
+            color: #4e54c8;
+        }
+    </style>
+</head>
+<body>
+<div class="delete-container">
+    <div class="delete-title">Delete Course</div>
+    <div class="delete-message">
+        Are you sure you want to delete "<strong>{{ course.title }}</strong>"?
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Confirm Delete</button>
+        <a href="{% url 'course_detail' course.id %}" class="cancel-link">Cancel</a>
+    </form>
+</div>
+</body>
+</html>

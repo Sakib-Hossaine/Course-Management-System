@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<style>
+    .profile-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .profile-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+        position: relative;
+        padding-bottom: 1.5rem;
+    }
+    
+    .profile-header::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 25%;
+        right: 25%;
+        height: 3px;
+        background: linear-gradient(90deg, #3498db, #9b59b6);
+        border-radius: 3px;
+    }
+    
+    .profile-header h1 {
+        font-size: 2.8rem;
+        font-weight: 700;
+        margin: 1rem 0 0.5rem;
+        color: #2c3e50;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+        background: linear-gradient(135deg, #3498db, #2c3e50);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        display: inline-block;
+    }
+    
+    .username {
+        font-size: 1.2rem;
+        color: #7f8c8d;
+        margin: 0.5rem 0 1.5rem;
+        font-weight: 400;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .username::before {
+        content: "";
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        background: linear-gradient(135deg, #3498db, #9b59b6);
+        border-radius: 50%;
+        margin-right: 8px;
+        vertical-align: middle;
+        box-shadow: 0 0 8px rgba(52, 152, 219, 0.6);
+    }
+    
+    .profile-image {
+        width: 250px;
+        height: 250px;
+        margin: 0 auto 1.5rem;
+        position: relative;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 5px solid #fff;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .profile-image:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .profile-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .no-image {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #7f8c8d;
+        font-weight: 500;
+    }
+    
+    .profile-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .detail-card {
+        background: #f9f9f9;
+        padding: 1.5rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        border-left: 4px solid #3498db;
+    }
+    
+    .detail-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        background: #fff;
+    }
+    
+    .detail-card h3 {
+        margin-top: 0;
+        color: #2c3e50;
+        font-size: 1.4rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #eee;
+    }
+    
+    .detail-card p {
+        margin: 0.8rem 0;
+        color: #555;
+        font-size: 1rem;
+    }
+    
+    .detail-card strong {
+        color: #2c3e50;
+        font-weight: 600;
+        min-width: 120px;
+        display: inline-block;
+    }
+    
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        margin-top: 2.5rem;
+        gap: 1rem;
+    }
+    
+    .btn {
+        padding: 0.8rem 1.8rem;
+        border-radius: 50px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3);
+    }
+    
+    .btn-warning {
+        background: linear-gradient(135deg, #f39c12, #e67e22);
+        color: white;
+    }
+    
+    .btn-warning:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(243, 156, 18, 0.3);
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3);
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(149, 165, 166, 0.3);
+    }
+    
+    form {
+        margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    input[type="file"] {
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+    }
+    
+    input[type="file"] + label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: white;
+        background-color: #95a5a6;
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    input[type="file"]:focus + label,
+    input[type="file"] + label:hover {
+        background-color: #7f8c8d;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 1.5rem;
+            margin: 1rem;
+        }
+        
+        .profile-header h1 {
+            font-size: 2.2rem;
+        }
+        
+        .profile-details {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+</style>
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-image">
+            {% if student.profile_picture %}
+                <img src="{{ student.profile_picture.url }}" alt="{{ student.user.username }}">
+            {% else %}
+                <div class="no-image">No Image</div>
+            {% endif %}
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" name="profile_picture" accept="image/*">
+                <button type="submit" class="btn btn-secondary btn-sm">Upload</button>
+            </form>
+        </div>
+        <h1>{{ student.get_full_name }}</h1>
+        <p class="username">@{{ student.username }}</p>
+        <a href="{% url 'users:edit_student_profile' %}" class="btn btn-warning btn-sm" style="margin-top:10px;">Edit</a>
+    </div>
+    
+    <div class="profile-details">
+        <div class="detail-card">
+            <h3>Class Information</h3>
+            <p><strong>Class:</strong>
+            {% if student.joined_classes.all %}
+                {{ student.joined_classes.first.category.name }}
+            {% else %}
+                {{ student.class_name }}
+            {% endif %}
+            </p>
+            <p><strong>School:</strong> {{ student.school_name }}</p>
+        </div>
+        
+        <div class="detail-card">
+            <h3>Contact Information</h3>
+            <p><strong>Address:</strong> {{ student.address }}</p>
+            <p><strong>Parent Phone:</strong> {{ student.parent_phone }}</p>
+            <p><strong>Email:</strong> {{ student.user.email }}</p>
+        </div>
+    </div>
+    
+    <div class="action-buttons">
+        <a href="{% url 'users:student_marks' %}" class="btn btn-primary">View Exam Marks</a>
+        <a href="{% url 'users:teacher_class_call' %}" class="btn btn-primary">Join Video Call</a>
+        <a href="{% url 'users:logout' %}" class="btn btn-danger" style="margin-left:10px;">Logout</a>
+    </div>
+</div>
+{% endblock %}

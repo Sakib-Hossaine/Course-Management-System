@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="note-form-container">
+    <div class="note-form-card">
+        <h2 class="note-form-title">{{ action }} Note</h2>
+        <form method="post" enctype="multipart/form-data" class="note-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="note-form-group">
+                    <label for="{{ field.id_for_label }}" class="note-form-label">{{ field.label }}{% if field.field.required %}<span class="required">*</span>{% endif %}</label>
+                    {{ field }}
+                    {% if field.help_text %}<small class="note-form-help">{{ field.help_text }}</small>{% endif %}
+                    {% for error in field.errors %}
+                        <div class="note-form-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <div class="note-form-actions">
+                <button type="submit" class="note-form-submit">{{ action }}</button>
+                <a href="{% url 'notes' %}" class="note-form-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+<style>
+.note-form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    background: #f7f9fa;
+}
+.note-form-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 2.5rem 2rem 2rem 2rem;
+    max-width: 520px;
+    width: 100%;
+}
+.note-form-title {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #2a3b4c;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+.note-form-group {
+    margin-bottom: 1.2rem;
+}
+.note-form-label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+    color: #34495e;
+}
+.note-form input[type="text"],
+.note-form input[type="number"],
+.note-form input[type="file"],
+.note-form textarea {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+    background: #f9fafb;
+    transition: border 0.2s;
+}
+.note-form input[type="text"]:focus,
+.note-form input[type="number"]:focus,
+.note-form textarea:focus {
+    border: 1.5px solid #4f8cff;
+    outline: none;
+}
+.note-form-help {
+    color: #7b8a99;
+    font-size: 0.9rem;
+}
+.note-form-error {
+    color: #e74c3c;
+    font-size: 0.92rem;
+    margin-top: 0.2rem;
+}
+.note-form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+}
+.note-form-submit {
+    background: linear-gradient(90deg, #4f8cff 0%, #38b6ff 100%);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.7rem 1.6rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(79,140,255,0.08);
+    transition: background 0.2s;
+}
+.note-form-submit:hover {
+    background: linear-gradient(90deg, #38b6ff 0%, #4f8cff 100%);
+}
+.note-form-cancel {
+    color: #4f8cff;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.7rem 1.2rem;
+    border-radius: 6px;
+    background: #f2f6fa;
+    transition: background 0.2s;
+}
+.note-form-cancel:hover {
+    background: #e3eaf2;
+}
+.required {
+    color: #e74c3c;
+    margin-left: 2px;
+}
+</style>
+{% endblock %}

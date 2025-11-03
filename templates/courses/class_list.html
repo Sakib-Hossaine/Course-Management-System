@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="class-list-container">
+    <h2>All Classes</h2>
+    {% if request.user.is_authenticated and request.user.user_type == 'teacher' %}
+    <a href="{% url 'add_class' %}" class="btn btn-primary" style="margin-bottom: 20px;">Add Class</a>
+    {% endif %}
+    <table class="class-table">
+        <thead>
+            <tr>
+                <th>Class</th>
+                <th>Description</th>
+                <th>Teacher</th>
+                <th>Student Limit</th>
+                <th>Current Students</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for c in classes %}
+            <tr data-joined="{% if request.user in c.students.all %}true{% else %}false{% endif %}">
+                <td>{{ c.category.name }}</td>
+                <td>{{ c.description|default:'-' }}</td>
+                <td>{{ c.teacher.username }}</td>
+                <td>{{ c.student_limit }}</td>
+                <td>{{ c.current_student_count }}</td>
+                <td>
+                    {% if request.user.is_authenticated and request.user.user_type == 'teacher' and c.teacher == request.user %}
+                        <a href="{% url 'edit_class' c.id %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url 'delete_class' c.id %}" class="btn btn-danger btn-sm">Delete</a>
+                    {% elif request.user.is_authenticated and request.user.user_type == 'student' %}
+                        {% if request.user in c.students.all %}
+                            <span class="btn btn-secondary btn-sm">Joined</span>
+                        {% elif c.is_full %}
+                            <span class="btn btn-secondary btn-sm">Full</span>
+                        {% else %}
+                            <a href="{% url 'join_class' c.id %}" class="btn btn-primary btn-sm join-btn">Join</a>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6">No classes available.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<style>
+.class-list-container { max-width: 900px; margin: 2rem auto; background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 2rem; }
+.class-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+.class-table th, .class-table td { padding: 0.8rem; border-bottom: 1px solid #eaeaea; text-align: center; }
+.class-table th { background: #f7f7f7; color: #2c3e50; font-weight: 700; }
+.btn { padding: 0.5rem 1.2rem; border-radius: 30px; font-weight: 600; border: none; cursor: pointer; text-decoration: none; font-size: 1rem; transition: all 0.2s; }
+.btn-primary { background: linear-gradient(135deg, #38b6ff, #4f8cff); color: #fff; }
+.btn-primary:hover { background: linear-gradient(135deg, #4f8cff, #38b6ff); }
+.btn-warning { background: linear-gradient(135deg, #ffb347, #ffcc33); color: #2a3b4c; }
+.btn-warning:hover { background: linear-gradient(135deg, #ffcc33, #ffb347); }
+.btn-danger { background: linear-gradient(135deg, #ff5858, #ff7b7b); color: #fff; }
+.btn-danger:hover { background: linear-gradient(135deg, #ff7b7b, #ff5858); }
+.btn-secondary { background: #95a5a6; color: #fff; }
+</style>
+<script>
+    (function(){
+        // Only run for authenticated students (template ensures join buttons exist only for students)
+        const rows = document.querySelectorAll('tr[data-joined]');
+        let hasJoinedAny = false;
+        rows.forEach(r => {
+            if(r.getAttribute('data-joined') === 'true') hasJoinedAny = true;
+        });
+        if(hasJoinedAny){
+            // Disable all join buttons that are not already 'Joined'
+            document.querySelectorAll('.join-btn').forEach(btn => {
+                // If the parent row has data-joined true, keep the Joined state. Otherwise disable the link.
+                const row = btn.closest('tr');
+                if(row && row.getAttribute('data-joined') !== 'true'){
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-secondary');
+                    btn.textContent = 'Unavailable';
+                    btn.setAttribute('aria-disabled', 'true');
+                    btn.removeAttribute('href');
+                }
+            });
+        }
+    })();
+</script>
+{% endblock %}

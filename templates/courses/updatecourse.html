@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Course</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background: linear-gradient(135deg, #8f94fb 0%, #4e54c8 100%);
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .edit-course-container {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(78,84,200,0.18);
+            max-width: 480px;
+            width: 100%;
+            padding: 36px 32px 28px 32px;
+            margin: 40px 0;
+            animation: fadeInUp 0.7s cubic-bezier(.39,.575,.565,1) both;
+        }
+        @keyframes fadeInUp {
+            0% { opacity: 0; transform: translateY(40px);}
+            100% { opacity: 1; transform: translateY(0);}
+        }
+        .edit-course-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4e54c8;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .edit-course-form label {
+            font-weight: 600;
+            color: #4e54c8;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .edit-course-form input[type="text"],
+        .edit-course-form input[type="number"],
+        .edit-course-form select,
+        .edit-course-form input[type="file"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 18px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            background: #f7f8fa;
+            transition: border 0.2s;
+        }
+        .edit-course-form input[type="text"]:focus,
+        .edit-course-form input[type="number"]:focus,
+        .edit-course-form select:focus {
+            border: 1.5px solid #4e54c8;
+            outline: none;
+        }
+        .edit-course-form .current-image {
+            margin-bottom: 18px;
+            text-align: center;
+        }
+        .edit-course-form .current-image img {
+            max-width: 180px;
+            max-height: 120px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(78,84,200,0.10);
+        }
+        .edit-course-form button {
+            width: 100%;
+            padding: 12px 0;
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .edit-course-form button:hover {
+            background: linear-gradient(135deg, #8f94fb, #4e54c8);
+        }
+        .edit-course-form .back-link {
+            display: block;
+            margin-top: 18px;
+            text-align: center;
+            color: #4e54c8;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .edit-course-form .back-link:hover {
+            color: #8f94fb;
+        }
+        @media (max-width: 600px) {
+            .edit-course-container {
+                padding: 18px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="edit-course-container">
+    <div class="edit-course-title">Edit Course</div>
+    <form method="post" enctype="multipart/form-data" class="edit-course-form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <label for="id_title">Title</label>
+        {{ form.title }}
+
+        <label for="id_instructor">Instructor</label>
+        {{ form.instructor }}
+
+        <label for="id_rating">Rating</label>
+        {{ form.rating }}
+
+        <label for="id_review_count">Review Count</label>
+        {{ form.review_count }}
+
+        <label for="id_enrollment_year">Enrollment Year</label>
+        {{ form.enrollment_year }}
+
+        <label for="id_current_price">Current Price</label>
+        {{ form.current_price }}
+
+        <label for="id_original_price">Original Price</label>
+        {{ form.original_price }}
+
+        <label for="id_category">Category</label>
+        {{ form.category }}
+
+        <label for="id_image">Image</label>
+        {% if course.image %}
+        <div class="current-image">
+            <span>Current Image:</span><br>
+            <img src="{{ course.image.url }}" alt="Current Image">
+        </div>
+        {% endif %}
+        {{ form.image }}
+
+        <button type="submit">Update Course</button>
+        <a href="{% url 'course_detail' course.id %}" class="back-link">Cancel</a>
+    </form>
+</div>
+</body>
+</html>

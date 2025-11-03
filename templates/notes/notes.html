@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'css/notes.css' %}" />
+{% endblock styles %}
+
+{% block content %}
+<div class="NOTES-container">
+    <div class="NOTES-header">
+        <h1>Educational Resources Notes</h1>
+        <p>Uploaded by Md. Sakib Hossaine</p>
+
+    </div>
+
+
+    {% if request.user.is_authenticated and request.user.user_type == 'teacher' %}
+    <div class="NOTES-add-float-btn-wrapper">
+        <a href="{% url 'add_note' %}" class="NOTES-add-float-btn">Add Note</a>
+    </div>
+    {% endif %}
+
+    <div class="NOTES-content">
+        <h2>EDUCATIONAL RESOURCES NOTES</h2>
+        <p>An educational resource is any material, tool, or content designed to support learning and teaching. These resources can be physical items, digital content, or intellectual aids that facilitate the educational process. They are used to help students acquire knowledge, develop skills, or deepen their understanding of a particular subject.</p>
+        <p>Examples of educational resources include:</p>
+        <ul>
+            <li>Textbooks and printed materials (e.g., workbooks, reference books)</li>
+            <li>Digital content, such as eBooks, educational websites, videos, and apps</li>
+            <li>Lesson plans, worksheets, and other teacher-created materials</li>
+            <li>Interactive tools like educational songs and virtual labs.</li>
+        </ul>
+    </div>
+
+    <div class="NOTES-related-notes">
+        <h3>You might also like:</h3>
+        
+        {% for note in notes %}
+        <div class="NOTES-related-item" data-item="{{ note.module_code }}">
+            <p>{{ note.title }}</p>
+            {% if note.pages %}
+            <p>{{ note.pages }} pages</p>
+            {% endif %}
+            <div class="NOTES-rating-display">
+                Rating: <span class="NOTES-rating-value">{{ note.rating }}</span>/5
+            </div>
+            <a href="{% url 'download_note' note.id %}" class="NOTES-download-button">
+                <img src="{% static 'images/down.png' %}" alt="Download">
+                Download
+            </a>
+            <button class="NOTES-report-button" onclick="reportItem({{ note.id }})">Report</button>
+            {% if request.user.is_authenticated and request.user.user_type == 'teacher' %}
+            <a href="{% url 'edit_note' note.id %}" class="NOTES-edit-button">Edit</a>
+            <a href="{% url 'delete_note' note.id %}" class="NOTES-delete-button">Delete</a>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p>No notes available yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal for Reporting -->
+<div id="NOTES-report-modal" class="NOTES-modal">
+    <div class="NOTES-modal-content">
+        <span class="NOTES-close-modal" onclick="closeModal('NOTES-report-modal')">&times;</span>
+        <h3>Report this Item</h3>
+        <textarea id="NOTES-report-reason" placeholder="Enter your reason for reporting..."></textarea>
+        <button onclick="submitReport()">Submit</button>
+    </div>
+</div>
+
+<script>
+function reportItem(noteId) {
+    // Open modal and handle reporting
+    const modal = document.getElementById('NOTES-report-modal');
+    modal.style.display = 'block';
+    
+    document.querySelector('.NOTES-close-modal').onclick = function() {
+        modal.style.display = 'none';
+    };
+    
+    document.querySelector('#NOTES-report-modal button').onclick = function() {
+        const reason = document.getElementById('NOTES-report-reason').value;
+        // Send report to server
+        fetch(`/notes/report/${noteId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({reason: reason})
+        })
+        .then(response => {
+            if(response.ok) {
+                alert('Report submitted successfully!');
+                modal.style.display = 'none';
+            } else {
+                alert('Error submitting report');
+            }
+        });
+    };
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+</script>
+{% endblock %}

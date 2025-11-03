@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<style>
+    .edit-profile-container {
+        max-width: 500px;
+        margin: 40px auto;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 6px 24px rgba(44, 62, 80, 0.10);
+        padding: 32px 28px 24px 28px;
+    }
+    .edit-profile-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 18px;
+        text-align: center;
+    }
+    .edit-profile-form label {
+        font-weight: 500;
+        color: #34495e;
+        margin-bottom: 6px;
+        display: block;
+    }
+    .edit-profile-form input[type="text"],
+    .edit-profile-form input[type="email"],
+    .edit-profile-form input[type="file"] {
+        width: 100%;
+        padding: 10px 12px;
+        margin-bottom: 18px;
+        border: 1px solid #dfe6e9;
+        border-radius: 6px;
+        font-size: 1rem;
+        background: #f8fafc;
+        transition: border 0.2s;
+    }
+    .edit-profile-form input[type="text"]:focus,
+    .edit-profile-form input[type="email"]:focus {
+        border: 1.5px solid #3498db;
+        outline: none;
+    }
+    .profile-pic-preview {
+        display: block;
+        margin: 0 auto 18px auto;
+        width: 90px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #e1eaf2;
+        background: #f4f8fb;
+    }
+    .edit-profile-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 18px;
+    }
+    .btn-back {
+        background: #b2bec3;
+        color: #fff;
+        border: none;
+        padding: 10px 28px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+        text-decoration: none;
+    }
+    .btn-back:hover {
+        background: #636e72;
+    }
+    .btn-update {
+        background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+        color: #fff;
+        border: none;
+        padding: 10px 28px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn-update:hover {
+        background: linear-gradient(90deg, #38f9d7 0%, #43e97b 100%);
+    }
+</style>
+<div class="edit-profile-container">
+    <div class="edit-profile-title">Edit Student Profile</div>
+    <form method="post" enctype="multipart/form-data" class="edit-profile-form">
+        {% csrf_token %}
+        {% if student.profile_picture %}
+            <img src="{{ student.profile_picture.url }}" alt="Profile Picture" class="profile-pic-preview">
+        {% else %}
+            <img src="{% static 'images/default-profile.png' %}" alt="Profile Picture" class="profile-pic-preview">
+        {% endif %}
+        <label for="profile_picture">Profile Picture</label>
+        <input type="file" name="profile_picture" id="profile_picture" accept="image/*">
+
+        
+
+        <label for="school_name">School</label>
+        <input type="text" name="school_name" id="school_name" value="{{ student.school_name }}" required>
+
+        <label for="address">Address</label>
+        <input type="text" name="address" id="address" value="{{ student.address }}" required>
+
+        <label for="parent_phone">Parent Phone</label>
+        <input type="text" name="parent_phone" id="parent_phone" value="{{ student.parent_phone }}" required>
+
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email" value="{{ student.email }}" required>
+
+        <div class="edit-profile-actions">
+            <a href="{% url 'users:student_profile' %}" class="btn-back">Back</a>
+            <button type="submit" class="btn-update">Update</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

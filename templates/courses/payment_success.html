@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container" style="padding:40px;">
+    <h2>Payment Successful</h2>
+    <p>Thank you! Your payment was successful.</p>
+    <pre>{{ data }}</pre>
+    <a href="{% url 'courses' %}">Back to courses</a>
+</div>
+{% endblock %}

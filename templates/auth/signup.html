@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Previous select dropdown styles... */
+    .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: white;
+        font-size: 16px;
+        margin-top: 6px;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 12px auto;
+        cursor: pointer;
+    }
+
+    /* Sign-up button animation styles */
+    .signup-button {
+        width: 100%;
+        padding: 15px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Hover effect */
+    .signup-button:hover {
+        background-color: #45a049;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Click effect */
+    .signup-button:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Pulse animation */
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+        }
+        70% {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+        }
+    }
+
+    /* Apply pulse animation on page load */
+    .animate-pop {
+        animation: pulse 1.5s infinite;
+    }
+
+    /* Ripple effect */
+    .signup-button::after {
+        content: "";
+        display: block;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+        background-repeat: no-repeat;
+        background-position: 50%;
+        transform: scale(10, 10);
+        opacity: 0;
+        transition: transform .5s, opacity 1s;
+    }
+
+    .signup-button:active::after {
+        transform: scale(0, 0);
+        opacity: .3;
+        transition: 0s;
+    }
+
+    /* Hero image styles */
+    .signup-hero {
+        width: 50%;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .hero-image {
+        width: 100%;
+        max-width: 900px;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .hero-image:hover {
+        transform: scale(1.02);
+    }
+</style>
+<div class="signup-wrapper">
+    <div class="signup-hero">
+        <img src="{% static 'images/student.jpg' %}" alt="Let's Learn Image" class="hero-image">
+    </div>
+    <div class="signup-content">
+        <h1 class="site-name animate-pop">Join Let's Learn to activate your Learning</h1>
+        <p class="animate-fade-in">Sign up to Let's Learn to get started!</p>
+        <div class="signup-options">
+            <form method="post" class="signup-form animate-fade-in" action="{% url 'users:register' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="form-error">{{ form.non_field_errors }}</div>
+                {% endif %}
+                <div class="form-group">
+                    <label for="username">Full Name</label>
+                    <input type="text" id="username" name="username" required placeholder="Enter your full name">
+                    {% if form.username.errors %}
+                        <div class="form-error">{{ form.username.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                    {% if form.email.errors %}
+                        <div class="form-error">{{ form.email.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="password1">Password</label>
+                    <input type="password" id="password1" name="password1" required placeholder="Enter your password">
+                    {% if form.password1.errors %}
+                        <div class="form-error">{{ form.password1.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="user_type">I am a:</label>
+                    <select id="user_type" name="user_type" required>
+                        <option value="" disabled selected>Select your role</option>
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                    </select>
+                    {% if form.user_type.errors %}
+                        <div class="form-error">{{ form.user_type.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="profile_picture">Profile Image</label>
+                    <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
+                    {% if form.profile_picture.errors %}
+                        <div class="form-error">{{ form.profile_picture.errors }}</div>
+                    {% endif %}
+                </div>
+                <button type="submit" class="signup-button animate-pop">Sign Up</button>
+            </form>
+        </div>
+        <p class="login-prompt animate-fade-in">Already have an account? <a href="{% url 'users:login' %}">Log in</a></p>
+    </div>
+</div>
+{% endblock content %}
