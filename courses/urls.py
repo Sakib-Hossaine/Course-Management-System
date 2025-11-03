@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path
 from . import views
 
 urlpatterns = [
@@ -12,5 +12,6 @@ urlpatterns = [
     path("courses/<int:pk>/update/", views.update_course, name="update_course"),
     path("courses/<int:pk>/delete/", views.delete_course, name="delete_course"),
     path("add/", views.add_course, name="add_course"),
-    path("", include("courses.urls_class")),
+    # My Courses: list the courses purchased by the logged-in user
+    path("my-courses/", views.my_courses, name="my_courses"),
 ]

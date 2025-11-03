@@ -2,9 +2,7 @@
 {% block content %}
 <div class="class-list-container">
     <h2>All Classes</h2>
-    {% if request.user.is_authenticated and request.user.user_type == 'teacher' %}
-    <a href="{% url 'add_class' %}" class="btn btn-primary" style="margin-bottom: 20px;">Add Class</a>
-    {% endif %}
+    {# Class CRUD removed - Add Class link removed #}
     <table class="class-table">
         <thead>
             <tr>
@@ -17,31 +15,9 @@
             </tr>
         </thead>
         <tbody>
-        {% for c in classes %}
-            <tr data-joined="{% if request.user in c.students.all %}true{% else %}false{% endif %}">
-                <td>{{ c.category.name }}</td>
-                <td>{{ c.description|default:'-' }}</td>
-                <td>{{ c.teacher.username }}</td>
-                <td>{{ c.student_limit }}</td>
-                <td>{{ c.current_student_count }}</td>
-                <td>
-                    {% if request.user.is_authenticated and request.user.user_type == 'teacher' and c.teacher == request.user %}
-                        <a href="{% url 'edit_class' c.id %}" class="btn btn-warning btn-sm">Edit</a>
-                        <a href="{% url 'delete_class' c.id %}" class="btn btn-danger btn-sm">Delete</a>
-                    {% elif request.user.is_authenticated and request.user.user_type == 'student' %}
-                        {% if request.user in c.students.all %}
-                            <span class="btn btn-secondary btn-sm">Joined</span>
-                        {% elif c.is_full %}
-                            <span class="btn btn-secondary btn-sm">Full</span>
-                        {% else %}
-                            <a href="{% url 'join_class' c.id %}" class="btn btn-primary btn-sm join-btn">Join</a>
-                        {% endif %}
-                    {% endif %}
-                </td>
-            </tr>
-        {% empty %}
-            <tr><td colspan="6">No classes available.</td></tr>
-        {% endfor %}
+        <h1>Removed</h1>
+        <p>The Class CRUD functionality has been removed from this site.</p>
+        <p>Use <a href="{% url 'my_courses' %}">My Courses</a> to view your purchased courses.</p>
         </tbody>
     </table>
 </div>

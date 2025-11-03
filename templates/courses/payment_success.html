@@ -1,10 +1,115 @@
+
+
 {% extends 'base.html' %}
 
+{% block styles %}
+<style>
+    /* Hide header action buttons on this page only (profile / login / signup) */
+    header nav a.blue-button { display: none !important; }
+
+    /* Page-specific styles for the payment receipt */
+    .receipt-root { max-width:1100px; margin:28px auto; padding:18px; }
+    .receipt-card { background:linear-gradient(180deg,#fff,#fbfdff); border-radius:14px; box-shadow:0 12px 34px rgba(12,40,60,0.06); padding:22px; }
+    .receipt-grid { display:grid; grid-template-columns: 1fr 360px; gap:22px; align-items:start; }
+    .success-badge { display:flex; gap:14px; align-items:center; }
+    .check { width:84px; height:84px; border-radius:999px; background:#2ecc71; display:flex; align-items:center; justify-content:center; }
+    .check svg { display:block }
+    .receipt-head h1 { margin:0; font-size:22px; color:#103349 }
+    .receipt-head p { margin:6px 0 0; color:#2b5567 }
+    .course-summary { display:flex; gap:12px; align-items:center; padding:12px; background:#fff; border:1px solid #eef6fb; border-radius:10px }
+    .course-thumb img{ width:220px; height:140px; object-fit:cover; border-radius:8px }
+    .course-meta h3{ margin:0 0 6px; font-size:18px }
+    .meta-row dt{ font-weight:700; color:#1b4254 }
+    .meta-row dd{ margin:0 0 8px }
+    .actions { display:flex; gap:10px; margin-top:12px }
+    @media(max-width:900px){ .receipt-grid{ grid-template-columns:1fr } .course-thumb img{ width:100%; height:auto } }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container" style="padding:40px;">
-    <h2>Payment Successful</h2>
-    <p>Thank you! Your payment was successful.</p>
-    <pre>{{ data }}</pre>
-    <a href="{% url 'courses' %}">Back to courses</a>
+<div class="receipt-root">
+    <div class="receipt-card">
+        <div class="receipt-grid">
+            <main>
+                <div class="receipt-head" role="status" aria-live="polite">
+                    <div class="success-badge">
+                        <div class="check" aria-hidden="true">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 12.2l2.7 2.7L17.5 6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <div>
+                            <h1>Payment successful</h1>
+                            <p class="lead">Thank you — your payment completed successfully. The course is now available in <a href="{% url 'my_courses' %}">My Courses</a>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <section style="margin-top:18px">
+                    {% if course %}
+                        {% with buy_course=course %}
+                            <div class="course-summary">
+                                <div class="course-thumb">
+                                    {% if buy_course.image %}
+                                        <img src="{{ buy_course.image.url }}" alt="{{ buy_course.title }}" />
+                                    {% endif %}
+                                </div>
+                                <div class="course-meta">
+                                    <h3>{{ buy_course.title }}</h3>
+                                    <div style="color:#2b5567">Instructor: {{ buy_course.instructor.name }}</div>
+                                    <div style="margin-top:8px;font-weight:700">Price: {{ buy_course.current_price }}</div>
+                                </div>
+                            </div>
+                        {% endwith %}
+                    {% elif payment and payment.course %}
+                        {% with buy_course=payment.course %}
+                            <div class="course-summary">
+                                <div class="course-thumb">
+                                    {% if buy_course.image %}
+                                        <img src="{{ buy_course.image.url }}" alt="{{ buy_course.title }}" />
+                                    {% endif %}
+                                </div>
+                                <div class="course-meta">
+                                    <h3>{{ buy_course.title }}</h3>
+                                    <div style="color:#2b5567">Instructor: {{ buy_course.instructor.name }}</div>
+                                    <div style="margin-top:8px;font-weight:700">Price: {{ buy_course.current_price }}</div>
+                                </div>
+                            </div>
+                        {% endwith %}
+                    {% else %}
+                        <div style="padding:12px;background:#fff;border:1px solid #f1f5f9;border-radius:8px">No course details available. Check <a href="{% url 'my_courses' %}">My Courses</a> or contact support.</div>
+                    {% endif %}
+                </section>
+
+                <section style="margin-top:18px">
+                    <h4 style="margin:0 0 8px">Payment details</h4>
+                    {% if data.tran_id or data.sessionkey or data.status or data.amount %}
+                        <dl class="meta-row">
+                            {% if data.tran_id %}<dt>Transaction ID</dt><dd>{{ data.tran_id }}</dd>{% endif %}
+                            {% if data.sessionkey %}<dt>Session Key</dt><dd>{{ data.sessionkey }}</dd>{% endif %}
+                            {% if data.amount %}<dt>Amount</dt><dd>{{ data.amount }}</dd>{% endif %}
+                            {% if data.currency %}<dt>Currency</dt><dd>{{ data.currency }}</dd>{% endif %}
+                            {% if data.status %}<dt>Status</dt><dd>{{ data.status }}</dd>{% endif %}
+                        </dl>
+                    {% else %}
+                        <pre class="raw-data">{{ data }}</pre>
+                    {% endif %}
+                </section>
+
+                <div class="actions">
+                    <a class="btn primary" href="{% url 'courses' %}">Browse more courses</a>
+                    <a class="btn outline" href="{% url 'my_courses' %}">My Courses</a>
+                </div>
+            </main>
+
+            <aside>
+                <div style="background:#fff;border:1px solid #eef6fb;padding:12px;border-radius:8px">
+                    <h4 style="margin:0 0 8px">Need help?</h4>
+                    <p style="margin:0 0 8px;color:#2b5567">If you don't see your course after a few minutes, contact support with your transaction id.</p>
+                    {% if data.tran_id %}
+                        <div style="font-weight:700">Ref: {{ data.tran_id }}</div>
+                    {% endif %}
+                </div>
+            </aside>
+        </div>
+    </div>
 </div>
 {% endblock %}

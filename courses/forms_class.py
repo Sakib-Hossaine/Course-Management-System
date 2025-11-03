@@ -1,12 +1,9 @@
-from django import forms
-from .models_class import SchoolClass, ClassCategory
+"""
+Class-related forms have been removed.
 
+This module remains as a placeholder to avoid import errors from
+other code that might import it. Remove this file entirely if you
+are certain no imports remain.
+"""
 
-class SchoolClassForm(forms.ModelForm):
-    class Meta:
-        model = SchoolClass
-        fields = ["category", "description", "student_limit"]
-
-
-class JoinClassForm(forms.Form):
-    class_id = forms.IntegerField(widget=forms.HiddenInput())
+__all__ = []

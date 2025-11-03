@@ -27,6 +27,49 @@ def course_detail(request, pk):
     return render(request, "courses/course details.html", {"course": course})
 
 
+def my_courses(request):
+    """Show courses the logged-in user has successfully purchased.
+
+    Uses Payment.user_email to match against request.user.email. Only payments
+    with status 'SUCCESS' are considered final purchases.
+    """
+    if not request.user.is_authenticated:
+        from django.shortcuts import redirect
+        from django.conf import settings
+
+        # Respect LOGIN_URL setting (may be a named URL)
+        from django.urls import reverse, NoReverseMatch
+
+        login_setting = settings.LOGIN_URL
+        try:
+            login_path = reverse(login_setting)
+        except NoReverseMatch:
+            login_path = login_setting
+
+        return redirect(f"{login_path}?next={request.path}")
+
+    user_email = getattr(request.user, "email", None)
+    payments = []
+    owned = []
+    if user_email:
+        # Include all non-failed payments for this user so previously-purchased
+        # courses (or pending verifications) are shown. We exclude final failed
+        # states to avoid showing canceled/failed attempts.
+        payments = (
+            Payment.objects.filter(user_email=user_email)
+            .exclude(status__in=("FAILED", "CANCEL"))
+            .select_related("course")
+        )
+        # collect unique courses in order of purchase and attach the payment
+        seen = set()
+        for p in payments.order_by("-created_at"):
+            if p.course_id not in seen:
+                seen.add(p.course_id)
+                owned.append({"course": p.course, "payment": p})
+
+    return render(request, "courses/mycourse.html", {"owned": owned, "payments": payments})
+
+
 # In your courses/views.py
 def add_course(request):
     if request.method == "POST":
@@ -210,16 +253,83 @@ def payment_success(request):
     except Exception:
         verified = False
 
-    # find payment by sessionkey
-    payment = Payment.objects.filter(session_key=sessionkey).first()
+    # find payment by sessionkey first; if missing, try transaction id, then
+    # fallback to matching by customer email + amount or most recent payment.
+    payment = None
+    if sessionkey:
+        payment = Payment.objects.filter(session_key=sessionkey).first()
+
+    # if gateway didn't include sessionkey in callback, try transaction id
+    if not payment and tran_id:
+        payment = Payment.objects.filter(transaction_id=tran_id).first()
+
+    # if still not found, try to match by customer email and amount (best-effort)
+    if not payment:
+        cus_email = data.get("cus_email") or data.get("email") or data.get("customer_email")
+        raw_amount = data.get("amount") or data.get("total_amount") or data.get("currency_amount")
+        from decimal import Decimal
+
+        if cus_email and raw_amount:
+            try:
+                amt = Decimal(str(raw_amount))
+            except Exception:
+                amt = None
+            if amt is not None:
+                payment = (
+                    Payment.objects.filter(user_email=cus_email)
+                    .filter(amount=amt)
+                    .order_by("-created_at")
+                    .first()
+                )
+
+    # last-resort: pick most recent non-failed payment for the reported customer
+    if not payment:
+        cus_email = data.get("cus_email") or data.get("email") or data.get("customer_email")
+        if cus_email:
+            payment = (
+                Payment.objects.filter(user_email=cus_email)
+                .exclude(status__in=("FAILED", "CANCEL"))
+                .order_by("-created_at")
+                .first()
+            )
     if payment:
-        if verified:
+        # Some gateways include a status field in the callback; accept that as
+        # success in addition to server-side verification so the user's
+        # purchased course appears immediately in "My Courses".
+        gateway_status = (data.get("status") or data.get("status_code") or "").upper()
+        success_statuses = {"VALID", "VALIDATED", "SUCCESS", "00"}
+        if verified or gateway_status in success_statuses:
             payment.status = "SUCCESS"
         else:
             payment.status = "PENDING"
         payment.transaction_id = tran_id
         payment.save()
-    return render(request, "courses/payment_success.html", {"data": data})
+
+        # If this endpoint was POSTed by the gateway from the user's
+        # browser session, perform a Post-Redirect-Get so the user's
+        # browser ends up at a GET URL (preserving cookies/session) and
+        # the template header will correctly reflect the logged-in user.
+        # Use 303 to force a GET on redirect.
+        if request.method == "POST":
+            from django.urls import reverse
+            from django.http import HttpResponseRedirect
+
+            params = []
+            if tran_id:
+                params.append(f"tran_id={tran_id}")
+            if sessionkey:
+                params.append(f"sessionkey={sessionkey}")
+            q = ("?" + "&".join(params)) if params else ""
+            return HttpResponseRedirect(reverse("payment_success") + q)
+
+    # pass payment and related course (if any) to the template so we can show
+    # a friendly receipt with course details when available.
+    course = payment.course if payment else None
+    return render(
+        request,
+        "courses/payment_success.html",
+        {"data": data, "payment": payment, "course": course},
+    )
 
 
 @csrf_exempt

@@ -1,19 +1,7 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<div class="class-delete-container">
-    <h2>Delete Class</h2>
-    <p>Are you sure you want to delete the class: <strong>{{ school_class.category.name }}</strong>?</p>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Delete</button>
-        <a href="{% url 'class_list' %}" class="btn btn-secondary">Cancel</a>
-    </form>
-</div>
-<style>
-.class-delete-container { max-width: 500px; margin: 2rem auto; background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 2rem; }
-.btn { padding: 0.5rem 1.2rem; border-radius: 30px; font-weight: 600; border: none; cursor: pointer; text-decoration: none; font-size: 1rem; transition: all 0.2s; }
-.btn-danger { background: linear-gradient(135deg, #ff5858, #ff7b7b); color: #fff; }
-.btn-danger:hover { background: linear-gradient(135deg, #ff7b7b, #ff5858); }
-.btn-secondary { background: #95a5a6; color: #fff; }
-</style>
-{% endblock %}
+    <h1>Removed</h1>
+    <p>The Class CRUD functionality has been removed from this site.</p>
+    <p>Use <a href="{% url 'my_courses' %}">My Courses</a> to view your purchased courses.</p>
+{% endblock content %}

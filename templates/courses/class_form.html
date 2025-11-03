@@ -6,8 +6,11 @@
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="btn btn-primary">{{ action }}</button>
-        <a href="{% url 'class_list' %}" class="btn btn-secondary">Cancel</a>
+  <a href="{% url 'my_courses' %}" class="btn btn-secondary">Cancel</a>
     </form>
+  <h1>Removed</h1>
+  <p>The Class CRUD functionality has been removed from this site.</p>
+  <p>Use <a href="{% url 'my_courses' %}">My Courses</a> to view your purchased courses.</p>
 </div>
 <style>
 .class-form-container { max-width: 500px; margin: 2rem auto; background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 2rem; }

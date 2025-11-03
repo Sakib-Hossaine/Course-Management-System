@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mycourses-container">
+  <h1>My Courses</h1>
+  {% if owned %}
+  <ol class="mycourses-list">
+      {% for item in owned %}
+        {% with course=item.course payment=item.payment %}
+        <li class="mycourse-item">
+          <div class="thumb">
+            {% if course.image %}
+              <img src="{{ course.image.url }}" alt="{{ course.title }}">
+            {% else %}
+              <img src="{% static 'images/default.png' %}" alt="No image">
+            {% endif %}
+          </div>
+          <div class="info">
+            <a href="{% url 'course_detail' course.id %}" class="course-title">{{ course.title }}</a>
+            <div class="course-sub">Instructor: {{ course.instructor.name }}</div>
+          </div>
+          <div class="meta">
+            <div class="price">{{ course.current_price }}</div>
+            <div class="status {% if payment.status %}{{ payment.status|lower }}{% endif %}">
+              {% if payment.status == 'SUCCESS' %}
+                Purchased
+              {% elif payment.status == 'PENDING' %}
+                Pending
+              {% else %}
+                {{ payment.status }}
+              {% endif %}
+            </div>
+          </div>
+        </li>
+        {% endwith %}
+      {% endfor %}
+  </ol>
+  {% else %}
+    <p>You have not purchased any courses yet.</p>
+  {% endif %}
+</div>
+  <style>
+    /* Container now spans the visible page area and uses a soft cream background */
+    .mycourses-container { background: #fffaf0; /* cream white */ padding:36px 48px; border-radius:0; box-shadow: none; margin:0; width:100%; min-height: calc(100vh - 140px); box-sizing:border-box; }
+  .mycourses-list { list-style:decimal; padding-left:28px; margin: 6px 0; }
+
+  /* Thin list items with matte blue border; items float on hover with blue background */
+  .mycourse-item { display:flex; align-items:center; gap:14px; padding:12px 18px; transition: transform 220ms ease, box-shadow 220ms ease, background-color 220ms ease; border-radius:10px; border:1px solid #b6d4ef; margin-bottom:12px; background:#ffffff; }
+  .mycourse-item:hover { transform:translateY(-8px); box-shadow: 0 20px 40px rgba(28,167,214,0.12); background: linear-gradient(90deg,#e6f7ff 0%, #d6efff 100%); }
+
+    .thumb img { width:140px; height:96px; object-fit:cover; border-radius:8px; box-shadow:0 6px 18px rgba(15,40,60,0.06); }
+    .info { flex:1; }
+    .course-title { font-size:16px; font-weight:700; color:#103349; text-decoration:none; transition: color 220ms ease; }
+    .mycourse-item:hover .course-title { color:#013243; }
+    .course-sub { font-size:13px; color:#516e78; margin-top:6px; }
+    .meta { width:150px; text-align:right; }
+    .price { font-weight:800; color:#0b556a; margin-bottom:8px; }
+    .status { display:inline-block; padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; }
+    .status.success { background:#e6faf1; color:#0a7a4a; border:1px solid #bfead0; }
+    .status.pending { background:#fff7e6; color:#9a7a2a; border:1px solid #f0dca8; }
+
+    /* Adjustments for mobile */
+    @media (max-width:720px){
+      .mycourse-item{flex-direction:column;align-items:flex-start;} 
+      .meta{width:100%;text-align:left;margin-top:8px;} 
+      .thumb img{width:100%;height:auto;max-width:420px;} 
+    }
+  </style>
+{% endblock content %}
