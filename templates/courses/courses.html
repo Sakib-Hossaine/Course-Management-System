@@ -21,9 +21,16 @@
             <img src="{{ course.image.url }}" alt="{{ course.title }}" class="course-image">
             <div class="course-info">
                 <h2>{{ course.title }}</h2>
-                <p>{{ course.instructor.name }}{% if course.instructor.credentials %}, {{ course.instructor.credentials }}{% endif %}</p>
-                <div class="course-rating">
-                    {{ course.rating }} {{ course.get_rating_stars }} ({{ course.enrollment_year }}:{{ course.review_count }})
+                                <p>
+                                    {% if course.instructor.instructor_profile %}
+                                        {{ course.instructor.instructor_profile.name }}{% if course.instructor.instructor_profile.credentials %}, {{ course.instructor.instructor_profile.credentials }}{% endif %}
+                                    {% else %}
+                                        {{ course.instructor.get_full_name }}{% if not course.instructor.get_full_name %}{{ course.instructor.username }}{% endif %}
+                                    {% endif %}
+                                </p>
+                <div class="course-meta-row">
+                    <span class="course-year">Enrollment: {{ course.enrollment_year }}</span>
+                    {% if course.topics.all %}<span class="course-topics">• {{ course.topics.count }} topics</span>{% endif %}
                 </div>
                 <div class="course-price">
                     ${{ course.current_price }} 

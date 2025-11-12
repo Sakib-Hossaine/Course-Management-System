@@ -52,6 +52,14 @@ body{font-family:Inter, 'Segoe UI', Arial, sans-serif;color:#111;background:#f6f
 .payment-row label{flex:1}
 .payment-actions{display:flex;gap:10px;margin-top:12px}
 
+/* Course content accordion styles */
+.topic-item{background:transparent;border-radius:8px;margin-top:10px}
+.topic-item summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:700;background:#f8fafc;border-radius:8px;border:1px solid #eef2ff}
+.topic-item[open] summary{background:#eef2ff}
+.topic-children{padding:10px 14px;border-left:1px solid #eef2ff;border-right:1px solid #eef2ff;border-bottom:1px solid #eef2ff}
+.topic-children ul{margin:0;padding-left:18px}
+.topic-children li{padding:8px 0;border-bottom:1px dashed #f1f5f9;color:#374151}
+
 </style>
 {% endblock %}
 
@@ -62,7 +70,15 @@ body{font-family:Inter, 'Segoe UI', Arial, sans-serif;color:#111;background:#f6f
 
     <header class="course-header">
         <h1 class="course-title">{{ course.title }}</h1>
-        <div class="course-sub">By <strong>{{ course.instructor.name }}</strong>{% if course.instructor.credentials %}, {{ course.instructor.credentials }}{% endif %} • <span class="rating">{{ course.rating }} ★</span> • {{ course.review_count }} reviews</div>
+                <div class="course-sub">By <strong>
+                    <a href="{% url 'instructor_courses' course.instructor.id %}" class="instructor-link" style="text-decoration:none;color:inherit">
+                        {% if course.instructor.instructor_profile %}
+                            {{ course.instructor.instructor_profile.name }}
+                        {% else %}
+                            {{ course.instructor.get_full_name }}{% if not course.instructor.get_full_name %}{{ course.instructor.username }}{% endif %}
+                        {% endif %}
+                    </a>
+                </strong>{% if course.instructor.instructor_profile and course.instructor.instructor_profile.credentials %}, {{ course.instructor.instructor_profile.credentials }}{% endif %} • Enrollment: {{ course.enrollment_year }}{% if course.topics.all %} • {{ course.topics.count }} topics{% endif %}</div>
     </header>
 
     <div class="page-grid">
@@ -81,7 +97,7 @@ body{font-family:Inter, 'Segoe UI', Arial, sans-serif;color:#111;background:#f6f
                 <div class="features">
                     <span class="feature">{{ course.category }}</span>
                     <span class="feature">Enrollment: {{ course.enrollment_year }}</span>
-                    <span class="feature">{{ course.review_count }} reviews</span>
+                    {% if course.topics.all %}<span class="feature">{{ course.topics.count }} topics</span>{% endif %}
                     <span class="feature">Self-paced</span>
                 </div>
 
@@ -90,12 +106,41 @@ body{font-family:Inter, 'Segoe UI', Arial, sans-serif;color:#111;background:#f6f
                     A practical, hands-on course to build skills quickly. (Course summary is not available.)
                 </div>
 
+                {% if course.topics.all %}
+                <div style="margin-top:18px">
+                    <h3>Course content</h3>
+                    <div class="course-content-list">
+                        {# Use Topic and SubTopic models: iterate topics related to this course #}
+                        {% if course.topics.all %}
+                            {% for topic in course.topics.all %}
+                                <details class="topic-item" open="false">
+                                    <summary>{{ forloop.counter }}. {{ topic.name }}</summary>
+                                    <div class="topic-children">
+                                        {% if topic.subtopics.all %}
+                                            <ul>
+                                                {% for sub in topic.subtopics.all %}
+                                                    <li>{{ sub.name }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                            <div style="color:var(--muted);font-size:0.95rem">No sub-topics listed.</div>
+                                        {% endif %}
+                                    </div>
+                                </details>
+                            {% endfor %}
+                        {% else %}
+                            <div style="color:var(--muted);font-size:0.95rem">Course content not provided.</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
                 <div style="margin-top:18px">
                     <h3>About the instructor</h3>
                     <div class="instructor" style="align-items:flex-start;">
                         <div class="instr-meta">
-                            <div style="font-weight:700">{{ course.instructor.name }}</div>
-                            <div style="color:var(--muted);font-size:0.95rem">{{ course.instructor.credentials }}</div>
+                            <div style="font-weight:700">{% if course.instructor.instructor_profile %}{{ course.instructor.instructor_profile.name }}{% else %}{{ course.instructor.get_full_name }}{% if not course.instructor.get_full_name %}{{ course.instructor.username }}{% endif %}{% endif %}</div>
+                            <div style="color:var(--muted);font-size:0.95rem">{% if course.instructor.instructor_profile %}{{ course.instructor.instructor_profile.credentials }}{% endif %}</div>
                         </div>
                     </div>
                 </div>
@@ -113,19 +158,21 @@ body{font-family:Inter, 'Segoe UI', Arial, sans-serif;color:#111;background:#f6f
                 </div>
 
                 <div class="buy-cta">
-                    {% if not user.is_authenticated or user.user_type != "teacher" %}
+                    {% if user.is_authenticated and user == course.instructor %}
+                        <a href="{% url 'update_course' course.id %}" class="btn btn-outline">Edit course</a>
+                    {% elif not user.is_authenticated or user.user_type != "teacher" %}
                         <form method="post" action="{% url 'start_payment' course.id %}">
                             {% csrf_token %}
                             <button type="submit" id="buy-button" class="btn btn-primary">Buy now</button>
                         </form>
                     {% else %}
-                        <a href="{% url 'update_course' course.id %}" class="btn btn-outline">Edit course</a>
+                        {# other teachers can view but not edit; show nothing special #}
                     {% endif %}
                 </div>
 
                 <div style="margin-top:12px;display:flex;gap:8px">
                     <a href="{% url 'courses' %}" class="btn btn-outline">Back to courses</a>
-                    {% if user.is_authenticated and user.user_type == "teacher" %}
+                    {% if user.is_authenticated and user == course.instructor %}
                         <a href="{% url 'delete_course' course.id %}" class="btn" style="background:#ef4444;color:#fff">Delete</a>
                     {% endif %}
                 </div>

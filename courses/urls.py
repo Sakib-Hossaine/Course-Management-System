@@ -14,4 +14,6 @@ urlpatterns = [
     path("add/", views.add_course, name="add_course"),
     # My Courses: list the courses purchased by the logged-in user
     path("my-courses/", views.my_courses, name="my_courses"),
+    # List all courses by a specific instructor (user)
+    path("instructor/<int:user_id>/", views.instructor_courses, name="instructor_courses"),
 ]

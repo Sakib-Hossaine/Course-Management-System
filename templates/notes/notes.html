@@ -41,9 +41,7 @@
             {% if note.pages %}
             <p>{{ note.pages }} pages</p>
             {% endif %}
-            <div class="NOTES-rating-display">
-                Rating: <span class="NOTES-rating-value">{{ note.rating }}</span>/5
-            </div>
+            {# Note ratings are not used for courses — keep note.rating if it belongs to notes model. Removed course rating only. #}
             <a href="{% url 'download_note' note.id %}" class="NOTES-download-button">
                 <img src="{% static 'images/down.png' %}" alt="Download">
                 Download

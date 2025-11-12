@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="max-width:1100px;margin:28px auto;padding:0 18px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+    <div>
+      <h1 style="margin:0">Courses by
+        {% if instructor_user.instructor_profile %}
+          {{ instructor_user.instructor_profile.name }}
+        {% else %}
+          {{ instructor_user.get_full_name }}{% if not instructor_user.get_full_name %}{{ instructor_user.username }}{% endif %}
+        {% endif %}
+      </h1>
+      {% if instructor_user.instructor_profile and instructor_user.instructor_profile.credentials %}
+        <div style="color:#6b7280;margin-top:6px">{{ instructor_user.instructor_profile.credentials }}</div>
+      {% endif %}
+    </div>
+    <div>
+      {% if user.is_authenticated and user == instructor_user %}
+        <a href="{% url 'add_course' %}" class="btn" style="background:#4e54c8;color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none">Add Course</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:20px">
+    <div style="width:420px;background:#95d0f5ff;border:1px solid #dbeffbff;border-radius:10px;padding:12px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+        {% if instructor_user.profile_picture %}
+          <img src="{{ instructor_user.profile_picture.url }}" alt="{{ instructor_user.username }}" style="width:120px;height:120px;border-radius:999px;object-fit:cover" />
+        {% elif instructor_user.instructor_profile and instructor_user.instructor_profile.user and instructor_user.instructor_profile.user.profile_picture %}
+          <img src="{{ instructor_user.instructor_profile.user.profile_picture.url }}" alt="{{ instructor_user.username }}" style="width:120px;height:120px;border-radius:999px;object-fit:cover" />
+        {% else %}
+          <div style="width:120px;height:120px;border-radius:999px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;color:#6b7280;font-weight:700">{{ instructor_user.username|slice:":1"|upper }}</div>
+        {% endif %}
+
+        <div style="text-align:center">
+          <div style="font-weight:700">{% if instructor_user.instructor_profile %}{{ instructor_user.instructor_profile.name }}{% else %}{{ instructor_user.get_full_name }}{% if not instructor_user.get_full_name %}{{ instructor_user.username }}{% endif %}{% endif %}</div>
+          {% if instructor_user.instructor_profile and instructor_user.instructor_profile.credentials %}
+            <div style="color:#6b7280;font-size:0.95rem">{{ instructor_user.instructor_profile.credentials }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div style="margin-top:12px;font-size:0.95rem;color:#374151">
+        {% if instructor_user.qualification %}
+          <div><strong>Qualification:</strong> {{ instructor_user.qualification }}</div>
+        {% endif %}
+        {% if instructor_user.subjects_taught %}
+          <div style="margin-top:6px"><strong>Subjects:</strong> {{ instructor_user.subjects_taught }}</div>
+        {% endif %}
+        {% if instructor_user.phone_number %}
+          <div style="margin-top:6px"><strong>Phone:</strong> {{ instructor_user.phone_number }}</div>
+        {% endif %}
+        
+        {% if instructor_user.address %}
+          <div style="margin-top:6px"><strong>Address:</strong> {{ instructor_user.address }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div style="flex:1">
+      {# Courses grid follows below; keep existing courses list rendering #}
+    </div>
+  </div>
+
+  {% if courses %}
+    <div style="display:flex;flex-direction:column;gap:18px">
+      {% for course in courses %}
+        <div style="background:#fff;border:1px solid #eef6fb;border-radius:10px;padding:14px;display:flex;gap:18px;align-items:center">
+          <div style="width:300px;flex:0 0 300px">
+            {% if course.image %}
+              <img src="{{ course.image.url }}" alt="{{ course.title }}" style="width:100%;height:180px;object-fit:cover;border-radius:8px" />
+            {% else %}
+              <div style="width:100%;height:180px;background:#f3f4f6;border-radius:8px"></div>
+            {% endif %}
+          </div>
+          <div style="flex:1;min-width:0">
+            <a href="{% url 'course_detail' course.id %}" style="font-weight:700;color:#103349;text-decoration:none;font-size:1.05rem">{{ course.title }}</a>
+            <div style="color:#6b7280;margin-top:8px">Enrollment: {{ course.enrollment_year }} • {{ course.topics.count }} topics</div>
+            <div style="margin-top:8px;color:#374151">{{ course.category|capfirst }}</div>
+          </div>
+          <div style="text-align:right;width:160px;flex:0 0 160px">
+            <div style="font-weight:800;color:#0b3c91;font-size:1.1rem">${{ course.current_price }}</div>
+            <div style="margin-top:10px">
+              {% if user.is_authenticated and user == instructor_user %}
+                <a href="{% url 'update_course' course.id %}" class="btn" style="padding:8px 12px;border-radius:6px;background:#fff;border:1px solid #e5e7eb;text-decoration:none;color:#111">Edit</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div style="padding:18px;background:#fff;border:1px solid #eef6fb;border-radius:8px">No courses published by this instructor yet.</div>
+  {% endif %}
+</div>
+
+{% endblock %}

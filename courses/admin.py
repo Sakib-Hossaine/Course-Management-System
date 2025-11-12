@@ -14,21 +14,23 @@ class CourseAdmin(admin.ModelAdmin):
     list_display = (
         "title",
         "instructor",
-        "rating",
-        "get_review_info_display",
+        "enrollment_year",
         "current_price",
         "original_price",
         "get_discount_percentage",
     )
-    list_filter = ("instructor", "rating", "enrollment_year")
+    list_filter = ("instructor", "enrollment_year")
     search_fields = ("title", "instructor__name")
-    ordering = ("-rating", "title")
+    ordering = ("title",)
     readonly_fields = ("image_preview",)
 
-    def get_review_info_display(self, obj):
-        return obj.get_review_info()
+    def get_topics_count(self, obj):
+        try:
+            return obj.topics.count()
+        except Exception:
+            return 0
 
-    get_review_info_display.short_description = "Reviews"
+    get_topics_count.short_description = "Topics"
 
     def get_discount_percentage(self, obj):
         if obj.original_price > 0:
@@ -38,10 +40,7 @@ class CourseAdmin(admin.ModelAdmin):
 
     get_discount_percentage.short_description = "Discount"
 
-    def get_rating_stars(self, obj):
-        return obj.get_rating_stars()
-
-    get_rating_stars.short_description = "Star Rating"
+    # legacy rating removed
 
     def image_preview(self, obj):
         if obj.image:

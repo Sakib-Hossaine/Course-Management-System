@@ -14,8 +14,6 @@ class PaymentInitTest(TestCase):
         self.course = Course.objects.create(
             title="T1",
             instructor=instructor,
-            rating=4.5,
-            review_count=10,
             enrollment_year=2024,
             current_price=100.00,
             original_price=150.00,

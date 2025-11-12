@@ -1,9 +1,18 @@
 from django.db import models
+from django.conf import settings
 
 
 class Instructor(models.Model):
     name = models.CharField(max_length=100)
     credentials = models.CharField(max_length=200)
+    # optional link to a user account (teacher). Not all instructors must be linked.
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="instructor_profile",
+    )
 
     def __str__(self):
         return self.name
@@ -11,9 +20,12 @@ class Instructor(models.Model):
 
 class Course(models.Model):
     title = models.CharField(max_length=200)
-    instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
-    rating = models.DecimalField(max_digits=2, decimal_places=1)
-    review_count = models.PositiveIntegerField()
+    # The user who created / teaches this course. Use AUTH_USER_MODEL so
+    # the 'instructor' is directly the teacher user account.
+    instructor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="courses"
+    )
+    # rating and review_count removed — topics and subtopics moved to dedicated models
     enrollment_year = models.PositiveIntegerField()
     current_price = models.DecimalField(max_digits=6, decimal_places=2)
     original_price = models.DecimalField(max_digits=6, decimal_places=2)
@@ -34,19 +46,39 @@ class Course(models.Model):
     def __str__(self):
         return self.title
 
-    def get_rating_stars(self):
-        """Returns star rating representation"""
-        return "★" * int(self.rating) + "☆" * (5 - int(self.rating))
-
-    def get_review_info(self):
-        """Returns formatted review count with year"""
-        return f"({self.enrollment_year}:{self.review_count})"
+    # legacy rating/review helpers removed
 
     def get_discount_percentage(self):
         if self.original_price > 0:
             discount = ((self.original_price - self.current_price) / self.original_price) * 100
             return f"{int(discount)}%"
         return "0%"
+
+
+class Topic(models.Model):
+    """A top-level topic within a Course."""
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="topics")
+    name = models.CharField(max_length=255)
+
+    class Meta:
+        ordering = ["id"]
+
+    def __str__(self):
+        return self.name
+
+
+class SubTopic(models.Model):
+    """A sub-topic that belongs to a Topic."""
+
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name="subtopics")
+    name = models.CharField(max_length=255)
+
+    class Meta:
+        ordering = ["id"]
+
+    def __str__(self):
+        return self.name
 
 
 class Payment(models.Model):

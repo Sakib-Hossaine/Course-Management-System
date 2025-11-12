@@ -18,7 +18,13 @@
           </div>
           <div class="info">
             <a href="{% url 'course_detail' course.id %}" class="course-title">{{ course.title }}</a>
-            <div class="course-sub">Instructor: {{ course.instructor.name }}</div>
+            <div class="course-sub">Instructor: 
+              {% if course.instructor.instructor_profile %}
+                {{ course.instructor.instructor_profile.name }}{% if course.instructor.instructor_profile.credentials %}, {{ course.instructor.instructor_profile.credentials }}{% endif %}
+              {% else %}
+                {{ course.instructor.get_full_name }}{% if not course.instructor.get_full_name %}{{ course.instructor.username }}{% endif %}
+              {% endif %}
+            </div>
           </div>
           <div class="meta">
             <div class="price">{{ course.current_price }}</div>

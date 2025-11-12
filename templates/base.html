@@ -30,7 +30,10 @@
          <nav>
          <a href="{% url 'home' %}">Home</a>
          <a href="{% url 'courses' %}">Courses</a>
-         <a href="{% url 'my_courses' %}">My Courses</a>
+         {% comment %} Hide My Courses link for teacher users; students and anonymous users keep it {% endcomment %}
+         {% if not request.user.is_authenticated or request.user.user_type != 'teacher' %}
+            <a href="{% url 'my_courses' %}">My Courses</a>
+         {% endif %}
          <a href="{% url 'notes' %}">Notes</a>
          <a href="{% url 'routine' %}">Routine</a>
          <a href="{% url 'users:contact' %}">Contact</a>

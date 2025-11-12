@@ -116,11 +116,13 @@
         <label for="id_instructor">Instructor</label>
         {{ form.instructor }}
 
-        <label for="id_rating">Rating</label>
-        {{ form.rating }}
+    <!-- rating and review_count removed -->
 
-        <label for="id_review_count">Review Count</label>
-        {{ form.review_count }}
+    <label for="id_topics">Topics</label>
+    <div id="topics-container"></div>
+    <div style="margin-top:8px">
+        <button type="button" id="add-topic-btn">+ Add topic</button>
+    </div>
 
         <label for="id_enrollment_year">Enrollment Year</label>
         {{ form.enrollment_year }}
@@ -147,5 +149,140 @@
         <a href="{% url 'course_detail' course.id %}" class="back-link">Cancel</a>
     </form>
 </div>
+<script>
+    (function(){
+        const container = document.getElementById('topics-container');
+        const addBtn = document.getElementById('add-topic-btn');
+        let idx = 0;
+
+        function createTopicBlock(name='', subtext=''){
+            const wrapper = document.createElement('div');
+            wrapper.className = 'topic-block';
+            wrapper.style.border = '1px dashed #e5e7eb';
+            wrapper.style.padding = '10px';
+            wrapper.style.marginBottom = '8px';
+
+            const currentIndex = idx; // capture topic index for closures
+
+            const topRow = document.createElement('div');
+            topRow.style.display = 'flex';
+            topRow.style.gap = '8px';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'topic_name';
+            input.placeholder = 'Topic name';
+            input.value = name;
+            input.style.flex = '1';
+            input.required = false;
+
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.textContent = 'Remove';
+            del.style.background = '#ef4444';
+            del.style.color = '#fff';
+            del.style.border = 'none';
+            del.style.padding = '6px 8px';
+            del.style.borderRadius = '6px';
+            del.onclick = () => wrapper.remove();
+
+            topRow.appendChild(input);
+            topRow.appendChild(del);
+
+            const sublabel = document.createElement('div');
+            sublabel.style.marginTop = '8px';
+            sublabel.innerHTML = '<label style="font-weight:600">Sub-topics</label>';
+
+            const subsContainer = document.createElement('div');
+            subsContainer.className = 'subs-container';
+            subsContainer.style.marginTop = '6px';
+
+            function createSubInput(val) {
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.gap = '8px';
+                row.style.marginBottom = '6px';
+
+                const subInput = document.createElement('input');
+                subInput.type = 'text';
+                subInput.name = `subtopic_${currentIndex}`; // repeated name -> request.POST.getlist
+                subInput.placeholder = 'Sub-topic name';
+                subInput.value = val || '';
+                subInput.style.flex = '1';
+
+                const subDel = document.createElement('button');
+                subDel.type = 'button';
+                subDel.textContent = '−';
+                subDel.style.background = '#ef4444';
+                subDel.style.color = '#fff';
+                subDel.style.border = 'none';
+                subDel.style.padding = '6px 10px';
+                subDel.style.borderRadius = '6px';
+                subDel.onclick = () => row.remove();
+
+                row.appendChild(subInput);
+                row.appendChild(subDel);
+                subsContainer.appendChild(row);
+            }
+
+            const addSubBtn = document.createElement('button');
+            addSubBtn.type = 'button';
+            addSubBtn.textContent = '+ Add subtopic';
+            addSubBtn.style.marginTop = '6px';
+            addSubBtn.onclick = function(e){ e.preventDefault(); createSubInput(''); };
+
+            // populate initial subtopics from provided array (handled below when pre-populating)
+            wrapper.appendChild(topRow);
+            wrapper.appendChild(sublabel);
+            wrapper.appendChild(subsContainer);
+            wrapper.appendChild(addSubBtn);
+
+            container.appendChild(wrapper);
+            idx += 1;
+        }
+
+        addBtn.addEventListener('click', function(){
+            createTopicBlock();
+        });
+
+        // Pre-populate existing topics
+        const existing = [];
+        {% for t in course.topics.all %}
+            existing.push({name: "{{ t.name|escapejs }}", subs: [{% for s in t.subtopics.all %}"{{ s.name|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}]});
+        {% endfor %}
+
+        existing.forEach(function(item){
+            createTopicBlock(item.name, '');
+            // fill subinputs for the most recently created topic (idx - 1)
+            const createdTopic = container.lastElementChild; // wrapper appended last
+            const subsCont = createdTopic.querySelector('.subs-container');
+            const arr = item.subs || [];
+            // remove the default empty sub input(s) if present
+            subsCont.innerHTML = '';
+            arr.forEach(function(s){
+                // create a sub input in the context of this topic
+                const row = document.createElement('div');
+                row.style.display = 'flex'; row.style.gap = '8px'; row.style.marginBottom = '6px';
+                const subInput = document.createElement('input');
+                subInput.type = 'text';
+                // name must match the topic index of this wrapper. We find its index by counting wrappers before it.
+                const topicWrappers = Array.from(container.querySelectorAll('.topic-block'));
+                const thisIndex = topicWrappers.indexOf(createdTopic);
+                subInput.name = `subtopic_${thisIndex}`;
+                subInput.placeholder = 'Sub-topic name';
+                subInput.value = s || '';
+                subInput.style.flex = '1';
+                const subDel = document.createElement('button');
+                subDel.type = 'button'; subDel.textContent = '−';
+                subDel.style.background = '#ef4444'; subDel.style.color = '#fff'; subDel.style.border = 'none'; subDel.style.padding = '6px 10px'; subDel.style.borderRadius = '6px';
+                subDel.onclick = () => row.remove();
+                row.appendChild(subInput); row.appendChild(subDel);
+                subsCont.appendChild(row);
+            });
+        });
+
+        if(existing.length === 0){ createTopicBlock(); }
+    })();
+</script>
 </body>
 </html>

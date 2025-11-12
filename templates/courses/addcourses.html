@@ -153,7 +153,17 @@
     <div class="add-course-title">Add course</div>
     <form class="add-course-form" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
+    {{ form.as_p }}
+    {# small preview container for image JS (guarded) #}
+    <div id="imagePreview" style="margin-top:8px"></div>
+        <hr style="margin:16px 0" />
+        <h3>Course topics</h3>
+        <p style="color:#666;font-size:0.95rem">Add topics and, for each topic, a list of sub-topics. Use the <strong>+ Add topic</strong> button to add more.</p>
+        <div id="topics-container"></div>
+        <div style="margin-top:8px">
+            <button type="button" id="add-topic-btn">+ Add topic</button>
+        </div>
+
         <div class="form-actions">
             <button type="submit">Add Course</button>
             <button type="reset">Reset</button>
@@ -161,26 +171,141 @@
     </form>
 </div>
 <script>
-    // Image preview functionality
-    document.getElementById('image').addEventListener('change', function(event) {
+    // Image preview functionality (guarded)
+    (function(){
+        const imgEl = document.getElementById('id_image') || document.getElementById('image');
         const preview = document.getElementById('imagePreview');
-        preview.innerHTML = '';
-        const file = event.target.files[0];
-        if (file) {
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
-            img.onload = function() {
-                URL.revokeObjectURL(img.src);
+        if (!imgEl || !preview) return; // nothing to do if elements missing
+
+        imgEl.addEventListener('change', function(event) {
+            preview.innerHTML = '';
+            const file = event.target.files && event.target.files[0];
+            if (file) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.onload = function() {
+                    URL.revokeObjectURL(img.src);
+                }
+                img.style.maxWidth = '64px';
+                img.style.maxHeight = '64px';
+                preview.appendChild(img);
+            } else {
+                const span = document.createElement('span');
+                span.className = 'no-image';
+                span.innerHTML = '\uD83D\uDCF7';
+                preview.appendChild(span);
             }
-            preview.appendChild(img);
-        } else {
-            const span = document.createElement('span');
-            span.className = 'no-image';
-            span.innerHTML = '&#128247;';
-            preview.appendChild(span);
-        }
-    });
+        });
+    })();
     // Optional: Add functionality for instructor buttons as needed
+
+    // Dynamic topics + subtopics UI
+    (function(){
+        const container = document.getElementById('topics-container');
+        const addBtn = document.getElementById('add-topic-btn');
+        let idx = 0;
+
+        function createTopicBlock(name='', subtext=''){
+            const wrapper = document.createElement('div');
+            wrapper.className = 'topic-block';
+            wrapper.style.border = '1px dashed #e5e7eb';
+            wrapper.style.padding = '10px';
+            wrapper.style.marginBottom = '8px';
+
+            const currentIndex = idx; // capture current topic index for closures
+
+            const topRow = document.createElement('div');
+            topRow.style.display = 'flex';
+            topRow.style.gap = '8px';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'topic_name';
+            input.placeholder = 'Topic name';
+            input.value = name;
+            input.style.flex = '1';
+            input.required = false;
+
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.textContent = 'Remove';
+            del.style.background = '#ef4444';
+            del.style.color = '#fff';
+            del.style.border = 'none';
+            del.style.padding = '6px 8px';
+            del.style.borderRadius = '6px';
+            del.onclick = () => wrapper.remove();
+
+            topRow.appendChild(input);
+            topRow.appendChild(del);
+
+            const sublabel = document.createElement('div');
+            sublabel.style.marginTop = '8px';
+            sublabel.innerHTML = '<label style="font-weight:600">Sub-topics</label>';
+
+            const subsContainer = document.createElement('div');
+            subsContainer.className = 'subs-container';
+            subsContainer.style.marginTop = '6px';
+
+            function createSubInput(val) {
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.gap = '8px';
+                row.style.marginBottom = '6px';
+
+                const subInput = document.createElement('input');
+                subInput.type = 'text';
+                subInput.name = `subtopic_${currentIndex}`; // repeated name -> request.POST.getlist
+                subInput.placeholder = 'Sub-topic name';
+                subInput.value = val || '';
+                subInput.style.flex = '1';
+
+                const subDel = document.createElement('button');
+                subDel.type = 'button';
+                subDel.textContent = '−';
+                subDel.style.background = '#ef4444';
+                subDel.style.color = '#fff';
+                subDel.style.border = 'none';
+                subDel.style.padding = '6px 10px';
+                subDel.style.borderRadius = '6px';
+                subDel.onclick = () => row.remove();
+
+                row.appendChild(subInput);
+                row.appendChild(subDel);
+                subsContainer.appendChild(row);
+            }
+
+            const addSubBtn = document.createElement('button');
+            addSubBtn.type = 'button';
+            addSubBtn.textContent = '+ Add subtopic';
+            addSubBtn.style.marginTop = '6px';
+            addSubBtn.onclick = function(e){ e.preventDefault(); createSubInput(''); };
+
+            // populate initial subtopics if provided (subtext is newline separated)
+            if(subtext){
+                const lines = subtext.split('\n').map(s => s.trim()).filter(Boolean);
+                lines.forEach(function(s){ createSubInput(s); });
+            } else {
+                // start with one empty sub-input by default
+                createSubInput('');
+            }
+
+            wrapper.appendChild(topRow);
+            wrapper.appendChild(sublabel);
+            wrapper.appendChild(subsContainer);
+            wrapper.appendChild(addSubBtn);
+
+            container.appendChild(wrapper);
+            idx += 1;
+        }
+
+        addBtn.addEventListener('click', function(){
+            createTopicBlock();
+        });
+
+        // Add one empty block by default
+        createTopicBlock();
+    })();
 </script>
 </body>
 </html>

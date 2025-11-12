@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal
 from .models import Payment
 import requests
+from django.contrib.auth import get_user_model
 
 try:
     from sslcommerz_python.payment import SSLCSession
@@ -51,6 +52,21 @@ def my_courses(request):
     user_email = getattr(request.user, "email", None)
     payments = []
     owned = []
+
+    # If teacher: show courses they added. Prefer linking via Instructor.user
+    # (more robust) and fall back to name-matching for legacy data.
+    if (
+        getattr(request.user, "is_authenticated", False)
+        and getattr(request.user, "user_type", None) == "teacher"
+    ):
+        # Courses where the 'instructor' FK points to the logged-in user
+        teacher_courses = Course.objects.filter(instructor=request.user)
+
+        for c in teacher_courses:
+            pseudo_payment = type("P", (), {"status": "YOUR_COURSE"})()
+            owned.append({"course": c, "payment": pseudo_payment})
+        return render(request, "courses/mycourse.html", {"owned": owned, "payments": []})
+
     if user_email:
         # Include all non-failed payments for this user so previously-purchased
         # courses (or pending verifications) are shown. We exclude final failed
@@ -72,10 +88,46 @@ def my_courses(request):
 
 # In your courses/views.py
 def add_course(request):
+    # Only authenticated teachers may add courses
+    if (
+        not getattr(request.user, "is_authenticated", False)
+        or getattr(request.user, "user_type", None) != "teacher"
+    ):
+        from django.urls import reverse, NoReverseMatch
+
+        login_setting = settings.LOGIN_URL
+        try:
+            login_path = reverse(login_setting)
+        except NoReverseMatch:
+            login_path = login_setting
+        return redirect(f"{login_path}?next={request.path}")
+
     if request.method == "POST":
         form = CourseForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            # Save form but allow handling of extra non-model fields (topics/subtopics)
+            course = form.save(commit=False)
+            # set the instructor to the logged-in user
+            course.instructor = request.user
+            course.save()
+            # Now parse dynamic topic fields sent from the template.
+            # We expect multiple inputs named 'topic_name' and matching 'subtopics_for_{index}' textareas.
+            topic_names = request.POST.getlist("topic_name")
+            # create Topic and SubTopic objects
+            from .models import Topic, SubTopic
+
+            for idx, tname in enumerate(topic_names):
+                tname = (tname or "").strip()
+                if not tname:
+                    continue
+                topic = Topic.objects.create(course=course, name=tname)
+                # collect repeated subtopic inputs named `subtopic_{idx}`
+                sub_list = request.POST.getlist(f"subtopic_{idx}")
+                for s in sub_list:
+                    s = (s or "").strip()
+                    if s:
+                        SubTopic.objects.create(topic=topic, name=s)
+            # done
             return redirect("courses")  # or wherever you want to redirect
     else:
         form = CourseForm()
@@ -84,10 +136,36 @@ def add_course(request):
 
 def update_course(request, pk):
     course = get_object_or_404(Course, pk=pk)
+    # Only the course owner (or staff) may edit
+    if not getattr(request.user, "is_authenticated", False) or (
+        request.user != course.instructor and not getattr(request.user, "is_staff", False)
+    ):
+        return redirect("course_detail", course.id)
+
     if request.method == "POST":
         form = CourseUpdateForm(request.POST, request.FILES, instance=course)
         if form.is_valid():
-            form.save()
+            # Save form then replace topics/subtopics for this course
+            course = form.save(commit=False)
+            course.save()
+            from .models import Topic, SubTopic
+
+            # Remove existing topics and subtopics and recreate from POST
+            Topic.objects.filter(course=course).delete()
+
+            topic_names = request.POST.getlist("topic_name")
+            for idx, tname in enumerate(topic_names):
+                tname = (tname or "").strip()
+                if not tname:
+                    continue
+                topic = Topic.objects.create(course=course, name=tname)
+                # collect repeated subtopic inputs named `subtopic_{idx}`
+                sub_list = request.POST.getlist(f"subtopic_{idx}")
+                for s in sub_list:
+                    s = (s or "").strip()
+                    if s:
+                        SubTopic.objects.create(topic=topic, name=s)
+
             return redirect("course_detail", course.id)
     else:
         form = CourseUpdateForm(instance=course)
@@ -96,11 +174,34 @@ def update_course(request, pk):
 
 def delete_course(request, pk):
     course = get_object_or_404(Course, pk=pk)
+    # Only the course owner (or staff) may delete
+    if not getattr(request.user, "is_authenticated", False) or (
+        request.user != course.instructor and not getattr(request.user, "is_staff", False)
+    ):
+        return redirect("course_detail", course.id)
+
     if request.method == "POST":
         course.delete()
         return redirect("courses")
     form = CourseDeleteForm(instance=course)
     return render(request, "courses/coursedelete.html", {"form": form, "course": course})
+
+
+def instructor_courses(request, user_id):
+    """Show all courses authored by the given instructor (user id).
+
+    The instructor is a user (Course.instructor points to the user model). We
+    display metadata from the linked Instructor profile when available.
+    """
+    User = get_user_model()
+    instructor_user = get_object_or_404(User, pk=user_id)
+    courses = Course.objects.filter(instructor=instructor_user)
+
+    return render(
+        request,
+        "courses/instructorcourses.html",
+        {"instructor_user": instructor_user, "courses": courses},
+    )
 
 
 def start_payment(request, pk):
